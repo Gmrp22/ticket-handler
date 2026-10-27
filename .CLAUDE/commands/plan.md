@@ -1,17 +1,17 @@
 ---
-description: Generate an implementation plan using `$ARGUMENT`
+description: Generate an implementation plan using `$ARGUMENTS`
 argument-hint: Specific info about what the user wants to do
 ---
 
 # User Input
-`$ARGUMENT` is the feature the user wants to build
+`$ARGUMENTS` is the feature the user wants to build
 
 Example:
-- "Angular 20"
-- "I want to build a basic backend architecure for a todo"
+- "I want to build a basic backend architecture for a todo"
 
 # Context
-Generate a new plan for implementing based on the user input, the output must be a markdwon file under `docs/learn/<plan>.md`.
+Generate a new plan for implementing based on the user input, the output must be a markdown file under `docs/learn/<plan>.md`. The user will provide more input and the plan will be refined, so make sure to start with just a simple structure, the user will provide the details.
 
-
-Make sure to be clear and extensive when needed.
+# Rules
+- Keep the plan short. List only what the user decides, no extra explanations or extra data.
+- Only create the plan markdown file. Do not create any source files, the user will ask for them later with more instructions.
