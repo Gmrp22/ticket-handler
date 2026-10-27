@@ -6,6 +6,8 @@
 - Express.js
 - PostgreSQL
 - Sequelize (ORM)
+- dotenv
+- Prettier
 
 ## Folder structure
 
@@ -19,9 +21,12 @@ ticket-handler-backend/
 │   ├── controllers/
 │   ├── routes/
 │   ├── services/
-│   └── middlewares/
+│   ├── middlewares/
+│   ├── app.js
+│   └── server.js
 ├── .env.example
 ├── .gitignore
+├── .sequelizerc
 ├── package.json
 └── README.md
 ```
