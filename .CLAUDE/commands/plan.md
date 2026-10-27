@@ -10,7 +10,7 @@ Example:
 - "I want to build a basic backend architecture for a todo"
 
 # Context
-Generate a new plan for implementing based on the user input, the output must be a markdown file under `docs/learn/<plan>.md`. The user will provide more input and the plan will be refined, so make sure to start with just a simple structure, the user will provide the details.
+Generate a new plan for implementing based on the user input, the output must be a markdown file under `docs/<plan>.md`. The user will provide more input and the plan will be refined, so make sure to start with just a simple structure, the user will provide the details.
 
 # Rules
 - Keep the plan short. List only what the user decides, no extra explanations or extra data.
