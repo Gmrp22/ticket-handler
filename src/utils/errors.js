@@ -32,4 +32,18 @@ class ForeignKeyViolationError extends AppError {
   }
 }
 
-module.exports = { AppError, ConflictError, NotFoundError, DatabaseError, ForeignKeyViolationError  };
+
+class BadRequestError extends AppError {
+  constructor(message = 'Bad request') {
+    super(message, 400);
+  }
+}
+
+module.exports = {
+  AppError,
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  DatabaseError,
+  ForeignKeyViolationError,
+};
