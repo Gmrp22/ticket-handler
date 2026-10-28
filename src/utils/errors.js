@@ -25,5 +25,11 @@ class DatabaseError extends AppError {
     this.isOperational = false;
   }
 }
+class ForeignKeyViolationError extends AppError {
+  constructor(message = 'Foreign key constraint violation', options) {
+    super(message, 409, options);
+    this.isOperational = true;
+  }
+}
 
-module.exports = { AppError, ConflictError, NotFoundError, DatabaseError };
+module.exports = { AppError, ConflictError, NotFoundError, DatabaseError, ForeignKeyViolationError  };
