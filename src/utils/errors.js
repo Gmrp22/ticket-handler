@@ -1,6 +1,6 @@
 class AppError extends Error {
-  constructor(message, statusCode) {
-    super(message);
+  constructor(message, statusCode, options) {
+    super(message, options);
     this.isOperational = true;
     this.statusCode = statusCode;
   }
@@ -18,4 +18,12 @@ class NotFoundError extends AppError {
   }
 }
 
-module.exports = { AppError, ConflictError, NotFoundError };
+class DatabaseError extends AppError {
+  constructor(message = 'Database error', options) {
+    super(message, 500, options);
+    // It is a server problem: it is logged, and the client only gets a generic 500
+    this.isOperational = false;
+  }
+}
+
+module.exports = { AppError, ConflictError, NotFoundError, DatabaseError };
