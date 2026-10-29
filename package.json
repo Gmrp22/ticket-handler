@@ -1,13 +1,9 @@
 {
   "name": "ticket-handler-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend to manage purchase tickets and the weekly payments to suppliers (Node.js, Express, PostgreSQL, Sequelize)",
   "main": "src/server.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "format": "prettier --write .",
@@ -20,8 +16,14 @@
     "type": "git",
     "url": "git+https://github.com/Gmrp22/ticket-handler.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "tickets",
+    "payments",
+    "express",
+    "sequelize",
+    "postgresql"
+  ],
+  "author": "gmrp22",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Gmrp22/ticket-handler/issues"
@@ -39,5 +41,9 @@
   "devDependencies": {
     "prettier": "^3.9.10",
     "sequelize-cli": "^6.6.5"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
   }
 }

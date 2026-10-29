@@ -1,11 +1,6 @@
 const { literal, UniqueConstraintError, ForeignKeyConstraintError } = require('sequelize');
 const { sequelize, Ticket, Supplier, Land, TicketItem, Product } = require('../models');
-const {
-  BadRequestError,
-  ConflictError,
-  DatabaseError,
-  NotFoundError,
-} = require('../utils/errors');
+const { BadRequestError, ConflictError, DatabaseError, NotFoundError } = require('../utils/errors');
 
 // The total of a ticket is the sum of quantity x price of its items
 const TOTAL = literal(

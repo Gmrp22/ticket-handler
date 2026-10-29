@@ -21,15 +21,15 @@ Every error has the same shape:
 `error` is a text. For `400` errors of invalid data it is a list of texts, one per wrong field:
 
 ```json
-{ "status": 400, "error": ["code: Too small: expected string to have >=1 characters", "items.0.price: Invalid input: expected number, received string"] }
+{ "status": 400, "error": ["code: cannot be empty", "items.0.price: must be a number"] }
 ```
 
-The text starts with the path of the field (`items.0.price` is the price of the first item).
+The text starts with the path of the field (`items.0.price` is the price of the first item), then says what is wrong: `is required`, `must be a whole number`, `cannot be negative`...
 
 | Status | When |
 |---|---|
 | `400` | Invalid JSON body, invalid data (a missing field, a wrong type, an `id` that is not a number, an invalid `sort`, `order`, `page` or `limit`), or a ticket points to a supplier, land or product that does not exist |
-| `404` | The resource does not exist |
+| `404` | The resource or the route does not exist |
 | `409` | A `code` already exists, or the resource cannot be deleted because it is used by tickets |
 | `500` | Server error. The message is always `Internal Server Error` |
 

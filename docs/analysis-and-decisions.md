@@ -103,7 +103,7 @@ Model:
 
 ### Validation
 - The data of every request (body, `id` of the URL and query) is validated with Zod, in the controller, before it reaches the service. The schemas are in `src/schemas`.
-- Invalid data answers `400` with one message per wrong field. The error handler turns the Zod error into that answer, so the controllers do not catch anything.
+- Invalid data answers `400` with one message per wrong field, written to be read by a person (`code: is required`, `limit: must be 100 or less`). The error handler turns the Zod error into that answer, so the controllers do not catch anything.
 - A ticket needs at least one item. `quantity` and `price` cannot be negative, but `quantity` can be 0 because the Excel has those lines.
 - The `id` of the URL must be a whole number. Before, `/tickets/abc` ended in a `500`.
 - Fields that are not in the schema are ignored, so the client cannot send fields we do not expect.
@@ -123,6 +123,7 @@ Model:
 - We do not translate Sequelize errors in a central place. We throw custom errors where the error happens, because a central translator grows with every new source of errors and the messages are generic.
 - Deleting a supplier, land or product that is used in tickets answers `409`. PostgreSQL reports it with the code `23001`, which Sequelize does not turn into a `ForeignKeyConstraintError`, so the service checks that code.
 - If a ticket points to a supplier, land or product that does not exist, it answers `400` (`BadRequestError`). A repeated ticket `code` answers `409`.
+- A route that does not exist answers `404` in JSON, with the same shape as the other errors. It is the last middleware before the error handler.
 - Errors from libraries with a 4xx status (for example an invalid JSON body) are returned with that status, not as `500`.
 - Logs use `console` for now: `console.warn` for expected errors, `console.error` with the full error for unexpected ones.
 
@@ -156,7 +157,7 @@ The test asks for the detail of the tickets bought from each supplier. I list th
 - Prettier rules (`.prettierrc`).
 
 ### Not added
+- Automated tests. The test does not ask for them and I preferred to finish all the requirements first. I checked the endpoints by hand, with the good requests and with the wrong ones (invalid data, ids that do not exist, routes that do not exist).
 - Authentication, the test does not ask for it.
-- A `notFound` middleware for routes that do not exist. They answer with the default `Cannot GET`.
 - A library for logs (`pino`), `console` is enough for now.
 - A central translator of Sequelize errors, see Error handling.

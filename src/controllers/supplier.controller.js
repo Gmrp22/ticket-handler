@@ -18,7 +18,10 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const supplier = await supplierService.update(idParamsSchema.parse(req.params).id, catalogSchema.parse(req.body));
+  const supplier = await supplierService.update(
+    idParamsSchema.parse(req.params).id,
+    catalogSchema.parse(req.body),
+  );
   res.json(supplier);
 };
 

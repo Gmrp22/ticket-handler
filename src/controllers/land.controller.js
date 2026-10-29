@@ -18,7 +18,10 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const land = await landService.update(idParamsSchema.parse(req.params).id, catalogSchema.parse(req.body));
+  const land = await landService.update(
+    idParamsSchema.parse(req.params).id,
+    catalogSchema.parse(req.body),
+  );
   res.json(land);
 };
 

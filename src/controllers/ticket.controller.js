@@ -18,7 +18,10 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const ticket = await ticketService.update(idParamsSchema.parse(req.params).id, ticketSchema.parse(req.body));
+  const ticket = await ticketService.update(
+    idParamsSchema.parse(req.params).id,
+    ticketSchema.parse(req.body),
+  );
   res.json(ticket);
 };
 

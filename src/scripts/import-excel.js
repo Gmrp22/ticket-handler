@@ -20,8 +20,18 @@ const readRows = async () => {
   const rows = [];
   sheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return;
-    const [ticketCode, date, supplierCode, supplierName, landCode, landName, productCode, productName, quantity, price] =
-      row.values.slice(1);
+    const [
+      ticketCode,
+      date,
+      supplierCode,
+      supplierName,
+      landCode,
+      landName,
+      productCode,
+      productName,
+      quantity,
+      price,
+    ] = row.values.slice(1);
 
     rows.push({
       ticketCode: String(ticketCode),
@@ -44,22 +54,39 @@ const insertCatalog = async (table, items, transaction) => {
   const values = items.map((item) => ({ ...item, created_at: now, updated_at: now }));
   await sequelize.getQueryInterface().bulkInsert(table, values, { transaction });
 
-  const saved = await sequelize.query(`SELECT id, code FROM ${table}`, { type: QueryTypes.SELECT, transaction });
+  const saved = await sequelize.query(`SELECT id, code FROM ${table}`, {
+    type: QueryTypes.SELECT,
+    transaction,
+  });
   return new Map(saved.map((item) => [item.code, item.id]));
 };
 
 const run = async () => {
   const rows = await readRows();
 
-  const [{ count }] = await sequelize.query('SELECT COUNT(*)::int AS count FROM tickets', { type: QueryTypes.SELECT });
+  const [{ count }] = await sequelize.query('SELECT COUNT(*)::int AS count FROM tickets', {
+    type: QueryTypes.SELECT,
+  });
   if (count > 0) {
     throw new Error('The database already has data. Import canceled.');
   }
 
   await sequelize.transaction(async (transaction) => {
-    const suppliers = await insertCatalog('suppliers', uniqueByCode(rows.map((row) => row.supplier)), transaction);
-    const lands = await insertCatalog('lands', uniqueByCode(rows.map((row) => row.land)), transaction);
-    const products = await insertCatalog('products', uniqueByCode(rows.map((row) => row.product)), transaction);
+    const suppliers = await insertCatalog(
+      'suppliers',
+      uniqueByCode(rows.map((row) => row.supplier)),
+      transaction,
+    );
+    const lands = await insertCatalog(
+      'lands',
+      uniqueByCode(rows.map((row) => row.land)),
+      transaction,
+    );
+    const products = await insertCatalog(
+      'products',
+      uniqueByCode(rows.map((row) => row.product)),
+      transaction,
+    );
 
     const now = new Date();
     const ticketsByCode = new Map();
@@ -74,9 +101,14 @@ const run = async () => {
         updated_at: now,
       });
     });
-    await sequelize.getQueryInterface().bulkInsert('tickets', [...ticketsByCode.values()], { transaction });
+    await sequelize
+      .getQueryInterface()
+      .bulkInsert('tickets', [...ticketsByCode.values()], { transaction });
 
-    const savedTickets = await sequelize.query('SELECT id, code FROM tickets', { type: QueryTypes.SELECT, transaction });
+    const savedTickets = await sequelize.query('SELECT id, code FROM tickets', {
+      type: QueryTypes.SELECT,
+      transaction,
+    });
     const tickets = new Map(savedTickets.map((ticket) => [ticket.code, ticket.id]));
 
     const items = rows.map((row) => ({

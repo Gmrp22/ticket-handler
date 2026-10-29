@@ -4,7 +4,9 @@ const { ZodError } = require('zod');
 function errorHandler(err, req, res, next) {
   // Invalid request data: one message per wrong field, for example "items.0.price: ..."
   if (err instanceof ZodError) {
-    const errors = err.issues.map((issue) => [issue.path.join('.'), issue.message].filter(Boolean).join(': '));
+    const errors = err.issues.map((issue) =>
+      [issue.path.join('.'), issue.message].filter(Boolean).join(': '),
+    );
     console.warn(`${req.method} ${req.originalUrl} [400] ${errors.join(', ')}`);
     return res.status(400).json({ status: 400, error: errors });
   }
