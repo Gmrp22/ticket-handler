@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { idParamsSchema } = require('../../src/schemas/common.schema');
 const { catalogSchema, catalogListQuerySchema } = require('../../src/schemas/catalog.schema');
 const { ticketSchema, ticketListQuerySchema } = require('../../src/schemas/ticket.schema');
-const { paymentQuerySchema } = require('../../src/schemas/payment.schema');
+const { paymentQuerySchema, weeksInIsoYear } = require('../../src/schemas/payment.schema');
 
 // The messages as the client sees them: "field: message"
 const errorsOf = (schema, data) => {
@@ -190,6 +190,29 @@ describe('paymentQuerySchema', () => {
     assert.deepEqual(errorsOf(paymentQuerySchema, { year: '1800', week: '3' }), [
       'year: must be between 1900 and 2100',
     ]);
+  });
+
+  test('knows which years have 53 weeks', () => {
+    const with53 = [2004, 2009, 2015, 2020, 2026, 2032, 2037];
+
+    for (let year = 2000; year <= 2040; year++) {
+      assert.equal(weeksInIsoYear(year), with53.includes(year) ? 53 : 52, String(year));
+    }
+  });
+
+  test('rejects week 53 in a year that only has 52 weeks', () => {
+    assert.deepEqual(errorsOf(paymentQuerySchema, { year: '2022', week: '53' }), [
+      'week: the year 2022 only has 52 weeks',
+    ]);
+    assert.deepEqual(errorsOf(paymentQuerySchema, { year: '2023', week: '53' }), [
+      'week: the year 2023 only has 52 weeks',
+    ]);
+    assert.doesNotThrow(() => paymentQuerySchema.parse({ year: '2022', week: '52' }));
+  });
+
+  test('accepts week 53 in a year that has it', () => {
+    assert.doesNotThrow(() => paymentQuerySchema.parse({ year: '2020', week: '53' }));
+    assert.doesNotThrow(() => paymentQuerySchema.parse({ year: '2026', week: '53' }));
   });
 
   test('accepts week 53 and the sort by code', () => {

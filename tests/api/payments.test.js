@@ -139,6 +139,15 @@ describe('GET /api/payments', () => {
     assert.deepEqual(body, { year: 2023, week: 10, total: '0.000', suppliers: [] });
   });
 
+  test('answers 400 for week 53 in a year that only has 52 weeks', async () => {
+    const without = await api.call('GET', '/api/payments?year=2022&week=53');
+    const withIt = await api.call('GET', '/api/payments?year=2020&week=53');
+
+    assert.equal(without.status, 400);
+    assert.deepEqual(without.body.error, ['week: the year 2022 only has 52 weeks']);
+    assert.equal(withIt.status, 200);
+  });
+
   test('answers 400 when the year or the week are missing or wrong', async () => {
     const missing = await api.call('GET', '/api/payments');
     const week = await api.call('GET', '/api/payments?year=2023&week=99');

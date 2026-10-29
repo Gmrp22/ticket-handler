@@ -168,6 +168,7 @@ The list can be sorted, and it is optional: `GET /suppliers?sort=name&order=desc
 What we pay to each supplier in one ISO week (the week starts on Monday), with the tickets that make each payment.
 
 - `year` is the ISO year and `week` is the ISO week (1 to 53). Both are required.
+- An ISO year has 52 or 53 weeks. Week 53 only exists in some years (for example 2020 and 2026). In the other years (for example 2022 and 2023) it answers `400` with `week: the year 2022 only has 52 weeks`, it does not move to the next year.
 - The ISO year can be different from the year of the date. For example, 2024-12-30 is week 1 of 2025.
 - `sort` is the field to sort the suppliers by: `name` (default) or `code`. `order` is `asc` (default) or `desc`. Any other value answers `400`. The tickets of each supplier are always ordered by `date`.
 - `400` if `year` (1900 to 2100) or `week` (1 to 53) is missing or is not a whole number.

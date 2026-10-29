@@ -150,7 +150,7 @@ The client must not see database errors, they show details of our tables. Unexpe
 - The total of each ticket comes from the shared `TOTAL`. The total of each supplier and of the week are added in JavaScript, in thousandths (whole numbers), because the totals come as text and this way there are no decimal errors.
 - The response is nested: supplier, then its tickets, with the total of each level. The test asks for the detail of the tickets, so we list the tickets and not their items (the items are in `GET /tickets/:id`).
 - A week without tickets answers `200` with an empty list and total 0. A ticket with all its items in quantity 0 is included, with total 0.
-- A `year` or `week` that is missing or is not a whole number answers `400`, like the rest of the validations.
+- A `year` or `week` that is missing or is not a whole number answers `400`, like the rest of the validations. Week 53 also answers `400` in a year that only has 52 weeks (the 28th of December is always in the last week of the year, so its week number is the number of weeks).
 
 **Why**
 
