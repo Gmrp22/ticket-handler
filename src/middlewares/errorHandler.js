@@ -11,7 +11,13 @@ function errorHandler(err, req, res, next) {
     return res.status(400).json({ status: 400, error: errors });
   }
 
-  // Errors from libraries (for example an invalid JSON body) carry a 4xx status
+  // express.json() could not read the body. Its message is from the parser, so we write our own
+  if (err.type === 'entity.parse.failed') {
+    console.warn(`${req.method} ${req.originalUrl} [400] ${err.message}`);
+    return res.status(400).json({ status: 400, error: 'Invalid JSON body' });
+  }
+
+  // Other errors from libraries carry a 4xx status
   const statusCode = err.statusCode || err.status;
   const isClientError = statusCode >= 400 && statusCode < 500;
 
