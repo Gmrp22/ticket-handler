@@ -112,6 +112,18 @@ Model:
 - The JSON is in camelCase (`supplierId`, `createdAt`), which is the usual style in JavaScript. The columns of the database are in snake_case (`supplier_id`), and Sequelize (`underscored: true`) converts between them.
 - Related data uses the lowercase name of the relation: `supplier`, `land`, `items`, `product`. They are declared with an alias (`as`) in `src/models/index.js`.
 
+### Tests
+- The test does not ask for tests, but I added them to show that the important rules are checked. They run with the test runner of Node (`node --test`), so there is no extra dependency.
+- There are two kinds, with two commands:
+  - `npm run test:unit` does not need the database. It checks the validation schemas (valid data and every wrong case, with the exact message), the error handler (what the client receives, and that a database error is never shown) and the custom errors.
+  - `npm run test:api` checks the endpoints with real requests, one file per endpoint (suppliers, lands, products, tickets and payments). It covers the good cases and the errors: totals, the items replaced by a `PUT`, `409` and `404`, the transaction that is undone when something fails, and the ISO week with the days and years at the edge.
+- The API tests use their own database, `ticket_handler_test`. Every run drops it, creates it and runs the migrations, so the migrations are tested too. The tests also refuse to run if the database is not the test one, so they can never delete the data of the app.
+- Every test starts with empty tables and creates its own data, so the tests do not depend on the Excel or on each other.
+- Suppliers, lands and products work the same, so they share the same tests (`tests/helpers/catalog-tests.js`) and each one has its own file.
+- The API tests run one file at a time, because they share the database.
+- I checked that the tests detect errors: I broke the code on purpose (the ISO year in the payments, and the transaction of the update of a ticket) and the tests failed.
+- Not covered: the import of the Excel, which I checked by hand.
+
 ### Error handling
 - One global error handler, the last middleware registered in `app.js`.
 - Errors have a flag `isOperational`:
@@ -157,7 +169,6 @@ The test asks for the detail of the tickets bought from each supplier. I list th
 - Prettier rules (`.prettierrc`).
 
 ### Not added
-- Automated tests. The test does not ask for them and I preferred to finish all the requirements first. I checked the endpoints by hand, with the good requests and with the wrong ones (invalid data, ids that do not exist, routes that do not exist).
 - Authentication, the test does not ask for it.
 - A library for logs (`pino`), `console` is enough for now.
 - A central translator of Sequelize errors, see Error handling.

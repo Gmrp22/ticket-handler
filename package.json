@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "test": "npm run test:unit && npm run test:api",
+    "test:unit": "node --test \"tests/unit/**/*.test.js\"",
+    "test:api": "node tests/prepare-db.js && node --test --test-concurrency=1 --require ./tests/helpers/env.js \"tests/api/**/*.test.js\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "migrate": "sequelize-cli db:migrate",

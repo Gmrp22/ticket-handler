@@ -74,11 +74,27 @@ Backend to manage purchase tickets. The data comes from the Excel file of the te
 |---|---|
 | `npm start` | Runs the server |
 | `npm run dev` | Runs the server and restarts it when a file changes |
+| `npm test` | Runs all the tests (the database must be running) |
+| `npm run test:unit` | Runs only the tests that do not need the database |
+| `npm run test:api` | Runs the tests of the endpoints, on a test database |
 | `npm run migrate` | Runs the pending migrations |
 | `npm run migrate:undo` | Undoes the last migration |
 | `npm run import` | Loads the Excel data into the database. Run it after the migrations |
 | `npm run format` | Formats the code with Prettier |
 | `npm run format:check` | Checks the format without changing anything |
+
+## Tests
+
+```bash
+npm test            # all the tests (the database must be running: docker compose up -d)
+npm run test:unit   # only the tests that do not need the database
+npm run test:api    # the tests of the endpoints, on a test database
+```
+
+They use the test runner of Node, so there is nothing else to install.
+
+- `test:unit` checks the validation of the data, the error handler and the custom errors.
+- `test:api` checks every endpoint with real requests: suppliers, lands, products, tickets and the weekly payments. Before running, it creates the database `ticket_handler_test` from zero (drops it if it exists, creates it and runs the migrations). It uses the same PostgreSQL of Docker, but it never touches the database of the app (`ticket_handler`).
 
 ## Start again from zero
 
@@ -115,6 +131,11 @@ src/
 ├── utils/         custom errors
 ├── app.js         Express configuration
 └── server.js      connects to the database and starts the server
+
+tests/
+├── unit/          validation, error handler and custom errors (no database)
+├── api/           one file per endpoint, on the test database
+└── helpers/       the test database, the fixtures and the shared tests
 ```
 
 ## More documentation
