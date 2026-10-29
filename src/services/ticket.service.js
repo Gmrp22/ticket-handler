@@ -143,4 +143,4 @@ const remove = async (id) => {
   }
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, create, update, remove, TOTAL };
