@@ -7,9 +7,14 @@ const {
   ForeignKeyViolationError,
 } = require('../utils/errors');
 
-const getAll = async () => {
+const getAll = async ({ sort, order }) => {
   try {
-    return await Supplier.findAll({ order: [['id', 'ASC']] });
+    return await Supplier.findAll({
+      order: [
+        [sort, order.toUpperCase()],
+        ['id', 'ASC'],
+      ],
+    });
   } catch (error) {
     throw new DatabaseError('Could not get suppliers', { cause: error });
   }

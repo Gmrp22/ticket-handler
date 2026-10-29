@@ -7,9 +7,14 @@ const {
   ForeignKeyViolationError,
 } = require('../utils/errors');
 
-const getAll = async () => {
+const getAll = async ({ sort, order }) => {
   try {
-    return await Land.findAll({ order: [['id', 'ASC']] });
+    return await Land.findAll({
+      order: [
+        [sort, order.toUpperCase()],
+        ['id', 'ASC'],
+      ],
+    });
   } catch (error) {
     throw new DatabaseError('Could not get lands', { cause: error });
   }

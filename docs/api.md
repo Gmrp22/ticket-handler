@@ -60,13 +60,15 @@ Object:
 
 | Method | URL | Body | Success | Errors |
 |---|---|---|---|---|
-| `GET` | `/suppliers` | | `200`, list of objects ordered by `id` (no pagination) | |
+| `GET` | `/suppliers` | | `200`, list of objects (no pagination). It can be sorted, see below | `400` invalid `sort` or `order` |
 | `GET` | `/suppliers/:id` | | `200`, one object | `404` |
 | `POST` | `/suppliers` | `{ "code": "SUP999", "name": "Name" }` | `201`, the created object | `409` code already exists |
 | `PUT` | `/suppliers/:id` | `{ "code": "SUP999", "name": "Name" }` | `200`, the updated object | `404`, `409` code already exists |
 | `DELETE` | `/suppliers/:id` | | `204` | `404`, `409` it has tickets |
 
 For `products`, the `409` on delete means "it is used in tickets".
+
+The list can be sorted, and it is optional: `GET /suppliers?sort=name&order=desc`. `sort` is `id` (default), `code` or `name`. `order` is `asc` (default) or `desc`. Without them the list comes by `id`, from the first to the last. Any other value answers `400`.
 
 ## Tickets
 

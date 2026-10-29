@@ -30,6 +30,30 @@ const catalogTests = ({ path, label, model, createUsage }) => {
         );
       });
 
+      test('sorts by the field and the order of the URL, they are optional', async () => {
+        await create('C-1', 'Bravo');
+        await create('C-2', 'Alpha');
+        await create('C-3', 'Charlie');
+        const codes = async (query) =>
+          (await api.call('GET', `${path}${query}`)).body.map((item) => item.code);
+
+        assert.deepEqual(await codes('?sort=name'), ['C-2', 'C-1', 'C-3']);
+        assert.deepEqual(await codes('?sort=name&order=desc'), ['C-3', 'C-1', 'C-2']);
+        assert.deepEqual(await codes('?sort=code&order=desc'), ['C-3', 'C-2', 'C-1']);
+        assert.deepEqual(await codes('?order=desc'), ['C-3', 'C-2', 'C-1']);
+        assert.deepEqual(await codes(''), ['C-1', 'C-2', 'C-3']);
+      });
+
+      test('answers 400 for a sort or an order that is not allowed', async () => {
+        const sort = await api.call('GET', `${path}?sort=password`);
+        const order = await api.call('GET', `${path}?order=up`);
+
+        assert.equal(sort.status, 400);
+        assert.deepEqual(sort.body.error, ['sort: must be one of: id, code, name']);
+        assert.equal(order.status, 400);
+        assert.deepEqual(order.body.error, ['order: must be one of: asc, desc']);
+      });
+
       test('answers an empty list when there is nothing', async () => {
         const { status, body } = await api.call('GET', path);
 

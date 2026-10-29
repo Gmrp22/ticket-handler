@@ -1,9 +1,9 @@
 const productService = require('../services/product.service');
 const { idParamsSchema } = require('../schemas/common.schema');
-const { catalogSchema } = require('../schemas/catalog.schema');
+const { catalogSchema, catalogListQuerySchema } = require('../schemas/catalog.schema');
 
 const getAll = async (req, res) => {
-  const products = await productService.getAll();
+  const products = await productService.getAll(catalogListQuerySchema.parse(req.query));
   res.json(products);
 };
 

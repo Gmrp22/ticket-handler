@@ -1,7 +1,7 @@
 const { test, describe } = require('node:test');
 const assert = require('node:assert/strict');
 const { idParamsSchema } = require('../../src/schemas/common.schema');
-const { catalogSchema } = require('../../src/schemas/catalog.schema');
+const { catalogSchema, catalogListQuerySchema } = require('../../src/schemas/catalog.schema');
 const { ticketSchema, ticketListQuerySchema } = require('../../src/schemas/ticket.schema');
 const { paymentQuerySchema } = require('../../src/schemas/payment.schema');
 
@@ -58,6 +58,25 @@ describe('catalogSchema (suppliers, lands and products)', () => {
 
   test('rejects a body that is not an object', () => {
     assert.deepEqual(errorsOf(catalogSchema, undefined), ['the body must be a JSON object']);
+  });
+});
+
+describe('catalogListQuerySchema', () => {
+  test('sorts by id ascending when there is nothing in the URL', () => {
+    assert.deepEqual(catalogListQuerySchema.parse({}), { sort: 'id', order: 'asc' });
+  });
+
+  test('accepts the allowed fields and rejects the others', () => {
+    assert.deepEqual(catalogListQuerySchema.parse({ sort: 'name', order: 'desc' }), {
+      sort: 'name',
+      order: 'desc',
+    });
+    assert.deepEqual(errorsOf(catalogListQuerySchema, { sort: 'password' }), [
+      'sort: must be one of: id, code, name',
+    ]);
+    assert.deepEqual(errorsOf(catalogListQuerySchema, { order: 'up' }), [
+      'order: must be one of: asc, desc',
+    ]);
   });
 });
 

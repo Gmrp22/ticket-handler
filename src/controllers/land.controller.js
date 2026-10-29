@@ -1,9 +1,9 @@
 const landService = require('../services/land.service');
 const { idParamsSchema } = require('../schemas/common.schema');
-const { catalogSchema } = require('../schemas/catalog.schema');
+const { catalogSchema, catalogListQuerySchema } = require('../schemas/catalog.schema');
 
 const getAll = async (req, res) => {
-  const lands = await landService.getAll();
+  const lands = await landService.getAll(catalogListQuerySchema.parse(req.query));
   res.json(lands);
 };
 

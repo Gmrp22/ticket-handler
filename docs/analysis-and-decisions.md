@@ -91,7 +91,7 @@ Model:
 
 ### Controllers
 - Controllers read the request and send the response. They do not catch errors, Express 5 sends them to the error handler.
-- Only the list of tickets and the payments can be sorted, with `sort` and `order` (`asc` or `desc`). Suppliers, lands and products have a fixed order (by `id`). Only a fixed list of fields is allowed for each one (tickets: `date`, `code`, `id`; payments: supplier `name`, `code`). Any other value answers `400`.
+- All the lists can be sorted with `sort` and `order` (`asc` or `desc`), and both are optional. Only a fixed list of fields is allowed for each one (suppliers, lands and products: `id`, `code`, `name`; tickets: `date`, `code`, `id`; payments: supplier `name`, `code`). Any other value answers `400`. Without them, the catalogs come by `id` and the tickets by `date`, the most recent first.
 - The list of tickets is paginated: `page` (default 1) and `limit` (default 20, maximum 100). It does not include the items, only `GET /tickets/:id` does.
 
 ### Routes
