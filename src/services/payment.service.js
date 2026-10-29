@@ -7,7 +7,7 @@ const { DatabaseError } = require('../utils/errors');
 const toThousandths = (total) => Math.round(Number(total) * 1000);
 const fromThousandths = (value) => (value / 1000).toFixed(3);
 
-const getWeekly = async ({ year, week }) => {
+const getWeekly = async ({ year, week, sort, order }) => {
   let tickets;
   try {
     // PostgreSQL gets the ISO week of each date: EXTRACT(isoyear FROM date) and EXTRACT(week FROM date)
@@ -20,7 +20,9 @@ const getWeekly = async ({ year, week }) => {
         ],
       },
       include: [{ model: Supplier, attributes: ['id', 'code', 'name'] }],
+      // supplier_id after the sort keeps the tickets of one supplier together, even if two have the same name
       order: [
+        [Supplier, sort, order.toUpperCase()],
         ['supplier_id', 'ASC'],
         ['date', 'ASC'],
         ['id', 'ASC'],

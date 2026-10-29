@@ -12,7 +12,7 @@ const TOTAL = literal(
   '(SELECT ROUND(COALESCE(SUM(quantity * price), 0), 3) FROM ticket_items WHERE ticket_items.ticket_id = "Ticket".id)',
 );
 
-const getAll = async ({ page, limit }) => {
+const getAll = async ({ page, limit, sort, order }) => {
   try {
     const { rows, count } = await Ticket.findAndCountAll({
       attributes: { include: [[TOTAL, 'total']] },
@@ -20,9 +20,10 @@ const getAll = async ({ page, limit }) => {
         { model: Supplier, attributes: ['id', 'code', 'name'] },
         { model: Land, attributes: ['id', 'code', 'name'] },
       ],
+      // id as second sort makes the order stable when two tickets have the same value
       order: [
-        ['date', 'DESC'],
-        ['id', 'DESC'],
+        [sort, order.toUpperCase()],
+        ['id', order.toUpperCase()],
       ],
       limit,
       offset: (page - 1) * limit,
