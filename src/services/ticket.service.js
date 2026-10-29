@@ -17,8 +17,8 @@ const getAll = async ({ page, limit, sort, order }) => {
     const { rows, count } = await Ticket.findAndCountAll({
       attributes: { include: [[TOTAL, 'total']] },
       include: [
-        { model: Supplier, attributes: ['id', 'code', 'name'] },
-        { model: Land, attributes: ['id', 'code', 'name'] },
+        { model: Supplier, as: 'supplier', attributes: ['id', 'code', 'name'] },
+        { model: Land, as: 'land', attributes: ['id', 'code', 'name'] },
       ],
       // id as second sort makes the order stable when two tickets have the same value
       order: [
@@ -44,11 +44,15 @@ const getById = async (id) => {
     ticket = await Ticket.findByPk(id, {
       attributes: { include: [[TOTAL, 'total']] },
       include: [
-        { model: Supplier, attributes: ['id', 'code', 'name'] },
-        { model: Land, attributes: ['id', 'code', 'name'] },
-        { model: TicketItem, include: [{ model: Product, attributes: ['id', 'code', 'name'] }] },
+        { model: Supplier, as: 'supplier', attributes: ['id', 'code', 'name'] },
+        { model: Land, as: 'land', attributes: ['id', 'code', 'name'] },
+        {
+          model: TicketItem,
+          as: 'items',
+          include: [{ model: Product, as: 'product', attributes: ['id', 'code', 'name'] }],
+        },
       ],
-      order: [[TicketItem, 'id', 'ASC']],
+      order: [[{ model: TicketItem, as: 'items' }, 'id', 'ASC']],
     });
   } catch (error) {
     throw new DatabaseError('Could not get ticket', { cause: error });
@@ -58,17 +62,17 @@ const getById = async (id) => {
   return ticket;
 };
 
-const create = async ({ code, date, supplier_id, land_id, items }) => {
+const create = async ({ code, date, supplierId, landId, items }) => {
   let ticketId;
   try {
     // Ticket and items are saved together: if one fails, nothing is saved
     ticketId = await sequelize.transaction(async (transaction) => {
-      const ticket = await Ticket.create({ code, date, supplier_id, land_id }, { transaction });
+      const ticket = await Ticket.create({ code, date, supplierId, landId }, { transaction });
 
       await TicketItem.bulkCreate(
-        items.map(({ product_id, quantity, price }) => ({
-          ticket_id: ticket.id,
-          product_id,
+        items.map(({ productId, quantity, price }) => ({
+          ticketId: ticket.id,
+          productId,
           quantity,
           price,
         })),
@@ -102,18 +106,18 @@ const findTicket = async (id) => {
   return ticket;
 };
 
-const update = async (id, { code, date, supplier_id, land_id, items }) => {
+const update = async (id, { code, date, supplierId, landId, items }) => {
   const ticket = await findTicket(id);
 
   try {
     // The items are replaced: the old ones are deleted and the new ones are created
     await sequelize.transaction(async (transaction) => {
-      await ticket.update({ code, date, supplier_id, land_id }, { transaction });
-      await TicketItem.destroy({ where: { ticket_id: ticket.id }, transaction });
+      await ticket.update({ code, date, supplierId, landId }, { transaction });
+      await TicketItem.destroy({ where: { ticketId: ticket.id }, transaction });
       await TicketItem.bulkCreate(
-        items.map(({ product_id, quantity, price }) => ({
-          ticket_id: ticket.id,
-          product_id,
+        items.map(({ productId, quantity, price }) => ({
+          ticketId: ticket.id,
+          productId,
           quantity,
           price,
         })),

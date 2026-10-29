@@ -18,16 +18,27 @@ Every error has the same shape:
 { "status": 404, "error": "Supplier not found" }
 ```
 
-`error` is a text. It can also be a list of texts.
+`error` is a text. For `400` errors of invalid data it is a list of texts, one per wrong field:
+
+```json
+{ "status": 400, "error": ["code: Too small: expected string to have >=1 characters", "items.0.price: Invalid input: expected number, received string"] }
+```
+
+The text starts with the path of the field (`items.0.price` is the price of the first item).
 
 | Status | When |
 |---|---|
-| `400` | Invalid JSON body, an invalid `sort` or `order`, or a ticket points to a supplier, land or product that does not exist |
+| `400` | Invalid JSON body, invalid data (a missing field, a wrong type, an `id` that is not a number, an invalid `sort`, `order`, `page` or `limit`), or a ticket points to a supplier, land or product that does not exist |
 | `404` | The resource does not exist |
 | `409` | A `code` already exists, or the resource cannot be deleted because it is used by tickets |
 | `500` | Server error. The message is always `Internal Server Error` |
 
-Not validated yet: a missing field (for example a `POST` without `name`) or an `id` that is not a number answer `500`, not `400`.
+The data of every request is validated before it is used:
+
+- `code` and `name` are required texts, not empty, up to 255 characters.
+- An `id` in the URL must be a whole number greater than 0.
+- A ticket needs `code`, `date` (`YYYY-MM-DD`, a real date), `supplierId`, `landId` and at least one item. Every item needs `productId`, `quantity` and `price`, which are numbers from 0 up.
+- Fields that are not part of the request are ignored.
 
 ## Things to keep in mind
 
@@ -35,7 +46,7 @@ Not validated yet: a missing field (for example a `POST` without `name`) or an `
 - **Dates** are `YYYY-MM-DD` (for example `"2023-01-07"`) for `date`. `createdAt` and `updatedAt` are full ISO dates.
 - **The ticket total is calculated** by the API (sum of `quantity x price` of its items). It is never sent in a request.
 - **`DELETE` answers `204` with no body.** Do not call `response.json()` on it.
-- **Related data keeps the model name** as key: `Supplier`, `Land`, `TicketItems`, `Product`.
+- **Names are in camelCase**, in the requests and in the responses: `supplierId`, `createdAt`. Related data uses the lowercase name: `supplier`, `land`, `items`, `product`.
 
 ## Suppliers, lands and products
 
@@ -63,7 +74,7 @@ For `products`, the `409` on delete means "it is used in tickets".
 
 `GET /tickets?page=1&limit=20&sort=date&order=desc`
 
-- `page` starts at 1 (default 1). `limit` is the size of the page (default 20, maximum 100).
+- `page` starts at 1 (default 1). `limit` is the size of the page (default 20, maximum 100, a bigger number answers `400`).
 - `sort` is the field to sort by: `date` (default), `code` or `id`. `order` is `asc` or `desc` (default `desc`). Any other value answers `400`.
 - The items are **not** included in the list.
 
@@ -74,13 +85,13 @@ For `products`, the `409` on delete means "it is used in tickets".
       "id": 1,
       "code": "1115651",
       "date": "2023-01-07",
-      "supplier_id": 1,
-      "land_id": 1,
+      "supplierId": 1,
+      "landId": 1,
       "total": "6845.000",
       "createdAt": "...",
       "updatedAt": "...",
-      "Supplier": { "id": 1, "code": "SUP009", "name": "Vendor Iota Trading" },
-      "Land": { "id": 1, "code": "LOC010", "name": "Processing Hub 2" }
+      "supplier": { "id": 1, "code": "SUP009", "name": "Vendor Iota Trading" },
+      "land": { "id": 1, "code": "LOC010", "name": "Processing Hub 2" }
     }
   ],
   "pagination": { "page": 1, "limit": 20, "total": 367, "totalPages": 19 }
@@ -96,19 +107,19 @@ For `products`, the `409` on delete means "it is used in tickets".
   "id": 1,
   "code": "1115651",
   "date": "2023-01-07",
-  "supplier_id": 1,
-  "land_id": 1,
+  "supplierId": 1,
+  "landId": 1,
   "total": "6845.000",
-  "Supplier": { "id": 1, "code": "SUP009", "name": "Vendor Iota Trading" },
-  "Land": { "id": 1, "code": "LOC010", "name": "Processing Hub 2" },
-  "TicketItems": [
+  "supplier": { "id": 1, "code": "SUP009", "name": "Vendor Iota Trading" },
+  "land": { "id": 1, "code": "LOC010", "name": "Processing Hub 2" },
+  "items": [
     {
       "id": 1,
-      "ticket_id": 1,
-      "product_id": 1,
+      "ticketId": 1,
+      "productId": 1,
       "quantity": "1475.000",
       "price": "0.700",
-      "Product": { "id": 1, "code": "PRD003", "name": "Product Gamma" }
+      "product": { "id": 1, "code": "PRD003", "name": "Product Gamma" }
     }
   ]
 }
@@ -122,18 +133,18 @@ For `products`, the `409` on delete means "it is used in tickets".
 {
   "code": "1234567",
   "date": "2023-03-01",
-  "supplier_id": 1,
-  "land_id": 1,
+  "supplierId": 1,
+  "landId": 1,
   "items": [
-    { "product_id": 1, "quantity": 100, "price": 0.7 },
-    { "product_id": 2, "quantity": 50, "price": 1.25 }
+    { "productId": 1, "quantity": 100, "price": 0.7 },
+    { "productId": 2, "quantity": 50, "price": 1.25 }
   ]
 }
 ```
 
 - `201` with the full ticket, like `GET /tickets/:id`.
 - `409` if the `code` already exists.
-- `400` if `supplier_id`, `land_id` or a `product_id` does not exist.
+- `400` if `supplierId`, `landId` or a `productId` does not exist.
 - The same product can be in more than one item.
 
 ### Update
@@ -166,13 +177,13 @@ What we pay to each supplier in one ISO week (the week starts on Monday), with t
 {
   "year": 2023,
   "week": 3,
-  "total": "12345.000",
+  "total": "67143.047",
   "suppliers": [
     {
       "supplier": { "id": 1, "code": "SUP009", "name": "Vendor Iota Trading" },
-      "total": "6845.000",
+      "total": "1747.200",
       "tickets": [
-        { "id": 1, "code": "1115651", "date": "2023-01-16", "total": "6845.000" }
+        { "id": 213, "code": "1114474", "date": "2023-01-16", "total": "1747.200" }
       ]
     }
   ]
@@ -182,4 +193,3 @@ What we pay to each supplier in one ISO week (the week starts on Monday), with t
 ## Not available yet
 
 - Filter by `code`.
-- Validation of the request data.

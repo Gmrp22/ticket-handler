@@ -1,43 +1,29 @@
 const ticketService = require('../services/ticket.service');
-const { BadRequestError } = require('../utils/errors');
-
-// Only these fields can be used to sort the list
-const SORT_FIELDS = ['date', 'code', 'id'];
+const { idParamsSchema } = require('../schemas/common.schema');
+const { ticketSchema, ticketListQuerySchema } = require('../schemas/ticket.schema');
 
 const getAll = async (req, res) => {
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
-  const sort = String(req.query.sort ?? 'date');
-  const order = String(req.query.order ?? 'desc').toLowerCase();
-
-  if (!SORT_FIELDS.includes(sort)) {
-    throw new BadRequestError(`sort must be one of: ${SORT_FIELDS.join(', ')}`);
-  }
-  if (!['asc', 'desc'].includes(order)) {
-    throw new BadRequestError('order must be asc or desc');
-  }
-
-  const tickets = await ticketService.getAll({ page, limit, sort, order });
+  const tickets = await ticketService.getAll(ticketListQuerySchema.parse(req.query));
   res.json(tickets);
 };
 
 const getById = async (req, res) => {
-  const ticket = await ticketService.getById(req.params.id);
+  const ticket = await ticketService.getById(idParamsSchema.parse(req.params).id);
   res.json(ticket);
 };
 
 const create = async (req, res) => {
-  const ticket = await ticketService.create(req.body);
+  const ticket = await ticketService.create(ticketSchema.parse(req.body));
   res.status(201).json(ticket);
 };
 
 const update = async (req, res) => {
-  const ticket = await ticketService.update(req.params.id, req.body);
+  const ticket = await ticketService.update(idParamsSchema.parse(req.params).id, ticketSchema.parse(req.body));
   res.json(ticket);
 };
 
 const remove = async (req, res) => {
-  await ticketService.remove(req.params.id);
+  await ticketService.remove(idParamsSchema.parse(req.params).id);
   res.status(204).send();
 };
 

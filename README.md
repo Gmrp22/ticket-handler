@@ -109,6 +109,7 @@ src/
 ├── migrations/    create the tables
 ├── models/        describe the tables and their relations
 ├── routes/        URLs of the API
+├── schemas/       validation of the request data (Zod)
 ├── scripts/       import of the Excel file
 ├── services/      queries to the database and business errors
 ├── utils/         custom errors

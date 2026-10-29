@@ -5,8 +5,8 @@ const TicketItem = sequelize.define(
   'TicketItem',
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    ticket_id: { type: DataTypes.INTEGER, allowNull: false },
-    product_id: { type: DataTypes.INTEGER, allowNull: false },
+    ticketId: { type: DataTypes.INTEGER, allowNull: false },
+    productId: { type: DataTypes.INTEGER, allowNull: false },
     quantity: { type: DataTypes.DECIMAL(12, 3), allowNull: false },
     price: { type: DataTypes.DECIMAL(12, 3), allowNull: false },
   },

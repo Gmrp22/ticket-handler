@@ -19,11 +19,11 @@ const getWeekly = async ({ year, week, sort, order }) => {
           where(fn('EXTRACT', literal('week FROM "Ticket"."date"')), week),
         ],
       },
-      include: [{ model: Supplier, attributes: ['id', 'code', 'name'] }],
-      // supplier_id after the sort keeps the tickets of one supplier together, even if two have the same name
+      include: [{ model: Supplier, as: 'supplier', attributes: ['id', 'code', 'name'] }],
+      // supplierId after the sort keeps the tickets of one supplier together, even if two have the same name
       order: [
-        [Supplier, sort, order.toUpperCase()],
-        ['supplier_id', 'ASC'],
+        [{ model: Supplier, as: 'supplier' }, sort, order.toUpperCase()],
+        ['supplierId', 'ASC'],
         ['date', 'ASC'],
         ['id', 'ASC'],
       ],
@@ -36,7 +36,7 @@ const getWeekly = async ({ year, week, sort, order }) => {
   const suppliers = [];
   let weekTotal = 0;
   for (const ticket of tickets) {
-    const { id, code, date, total, Supplier: supplier } = ticket.get({ plain: true });
+    const { id, code, date, total, supplier } = ticket.get({ plain: true });
 
     if (suppliers.at(-1)?.supplier.id !== supplier.id) {
       suppliers.push({ supplier, total: 0, tickets: [] });

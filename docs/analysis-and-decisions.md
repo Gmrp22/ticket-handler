@@ -58,7 +58,7 @@ Model:
 - Migrations are in `src/migrations`, configured with `.sequelizerc`.
 - The database runs in Docker (PostgreSQL 18) with a named volume.
 - Scripts: `start`, `dev` (`node --watch`), `format`, `migrate`, `import`.
-- Stack required by the test: Node.js, Express, PostgreSQL and Sequelize. The rest is our choice: `dotenv`, `cors`, `exceljs` and Prettier.
+- Stack required by the test: Node.js, Express, PostgreSQL and Sequelize. The rest is our choice: `dotenv`, `cors`, `exceljs`, `zod` and Prettier.
 - We use the latest stable versions of everything, to avoid problems with old ones.
 - CommonJS (`require`) instead of ES modules (`import`). It is what Sequelize and its CLI use by default, so there is less configuration.
 - `node --watch` instead of `nodemon` to restart in development, so there is one dependency less.
@@ -101,6 +101,17 @@ Model:
 - `DELETE` answers `204` with no body.
 - A ticket is created and updated with its items in the same body (`items`), there is no separate endpoint for the items.
 
+### Validation
+- The data of every request (body, `id` of the URL and query) is validated with Zod, in the controller, before it reaches the service. The schemas are in `src/schemas`.
+- Invalid data answers `400` with one message per wrong field. The error handler turns the Zod error into that answer, so the controllers do not catch anything.
+- A ticket needs at least one item. `quantity` and `price` cannot be negative, but `quantity` can be 0 because the Excel has those lines.
+- The `id` of the URL must be a whole number. Before, `/tickets/abc` ended in a `500`.
+- Fields that are not in the schema are ignored, so the client cannot send fields we do not expect.
+
+### API format
+- The JSON is in camelCase (`supplierId`, `createdAt`), which is the usual style in JavaScript. The columns of the database are in snake_case (`supplier_id`), and Sequelize (`underscored: true`) converts between them.
+- Related data uses the lowercase name of the relation: `supplier`, `land`, `items`, `product`. They are declared with an alias (`as`) in `src/models/index.js`.
+
 ### Error handling
 - One global error handler, the last middleware registered in `app.js`.
 - Errors have a flag `isOperational`:
@@ -126,7 +137,7 @@ The client must not see database errors, they show details of our tables. Unexpe
 - The total of each ticket comes from the shared `TOTAL`. The total of each supplier and of the week are added in JavaScript, in thousandths (whole numbers), because the totals come as text and this way there are no decimal errors.
 - The response is nested: supplier, then its tickets, with the total of each level. The test asks for the detail of the tickets, so we list the tickets and not their items (the items are in `GET /tickets/:id`).
 - A week without tickets answers `200` with an empty list and total 0. A ticket with all its items in quantity 0 is included, with total 0.
-- A `year` or `week` that is missing or is not a whole number answers `400`. It is checked inside the controller, without Zod.
+- A `year` or `week` that is missing or is not a whole number answers `400`, like the rest of the validations.
 
 **Why**
 
@@ -137,7 +148,6 @@ At first the suppliers came ordered by `id`, which says nothing to a person, so 
 The test asks for the detail of the tickets bought from each supplier. I list the tickets with their total, and the items are in `GET /tickets/:id`.
 
 ### Left for later
-- Validation of the request data with Zod (missing fields and ids that are not a number should be a `400`, today they are a `500`).
 - Indexes on the foreign keys and on `tickets.date`. For now the tables are small.
 - `helmet` and the rate limit.
 - Filter by `code`.

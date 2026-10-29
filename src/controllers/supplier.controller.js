@@ -1,4 +1,6 @@
 const supplierService = require('../services/supplier.service');
+const { idParamsSchema } = require('../schemas/common.schema');
+const { catalogSchema } = require('../schemas/catalog.schema');
 
 const getAll = async (req, res) => {
   const suppliers = await supplierService.getAll();
@@ -6,22 +8,22 @@ const getAll = async (req, res) => {
 };
 
 const getById = async (req, res) => {
-  const supplier = await supplierService.getById(req.params.id);
+  const supplier = await supplierService.getById(idParamsSchema.parse(req.params).id);
   res.json(supplier);
 };
 
 const create = async (req, res) => {
-  const supplier = await supplierService.create(req.body);
+  const supplier = await supplierService.create(catalogSchema.parse(req.body));
   res.status(201).json(supplier);
 };
 
 const update = async (req, res) => {
-  const supplier = await supplierService.update(req.params.id, req.body);
+  const supplier = await supplierService.update(idParamsSchema.parse(req.params).id, catalogSchema.parse(req.body));
   res.json(supplier);
 };
 
 const remove = async (req, res) => {
-  await supplierService.remove(req.params.id);
+  await supplierService.remove(idParamsSchema.parse(req.params).id);
   res.status(204).send();
 };
 
